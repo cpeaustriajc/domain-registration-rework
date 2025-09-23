@@ -1,6 +1,5 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
@@ -10,30 +9,62 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { domainTransfer, getDomain, myDomains, myProducts, preferences, pushDomain } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import {
+    ArrowRightLeftIcon,
+    GlobeIcon,
+    MessageSquareWarningIcon,
+    PieChartIcon,
+    SearchIcon,
+    Settings2Icon,
+    ShoppingBagIcon,
+} from 'lucide-react';
 import AppLogo from './app-logo';
+import { NavDomainManagement } from './nav-domain-management';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        title: 'Get Domain',
+        href: getDomain().url,
+        icon: SearchIcon,
+    },
+    {
+        title: 'My Domains',
+        href: myDomains().url,
+        icon: GlobeIcon,
+    },
+    {
+        title: 'My Products',
+        href: myProducts().url,
+        icon: ShoppingBagIcon,
+    },
+];
+
+const domainManagementNavItems: NavItem[] = [
+    {
+        title: 'Push Domain',
+        href: pushDomain().url,
+        icon: PieChartIcon,
+    },
+    {
+        title: 'Preferences',
+        href: preferences().url, // Use the correct route helper for preferences
+        icon: Settings2Icon,
+    },
+    {
+        title: 'Domain Transfer',
+        href: domainTransfer().url,
+        icon: ArrowRightLeftIcon,
     },
 ];
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        title: 'Report Abuse',
+        href: '#',
+        icon: MessageSquareWarningIcon,
     },
 ];
 
@@ -44,7 +75,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={myDomains()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -54,11 +85,12 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <NavDomainManagement items={domainManagementNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
+                {/* <NavUser /> */}
             </SidebarFooter>
         </Sidebar>
     );
