@@ -12,6 +12,7 @@ import {
 import AppLogo from './app-logo';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
+import { DropdownMenu } from './ui/dropdown-menu';
 import {
     NavigationMenu,
     NavigationMenuIndicator,
@@ -67,13 +68,13 @@ export function AppSidebarHeader({
     return (
         <header className="sticky top-0 z-20 flex w-full shrink-0 items-center justify-between gap-2 bg-sidebar/95 px-6 backdrop-blur-md transition-[width,height] ease-linear supports-[backdrop-filter]:bg-sidebar/60 md:px-4">
             <div className="flex h-(--header-height) flex-1 items-center">
-                <SidebarTrigger className="mr-8" />
+                <SidebarTrigger name="left" className="mr-8" />
                 <Link href="/my-domains">
                     <AppLogo />
                 </Link>
                 {/* <Breadcrumbs breadcrumbs={breadcrumbs} /> */}
 
-                <NavigationMenu className="hidden lg:flex px-8">
+                <NavigationMenu className="hidden px-8 lg:flex">
                     <NavigationMenuList>
                         {headerNavItems.map((item) => (
                             <NavigationMenuItem key={item.title}>
@@ -109,9 +110,10 @@ export function AppSidebarHeader({
             </div>
 
             <div className="flex items-center gap-4">
-                <Link href="#">
-                    <ShoppingCartIcon className="size-5" />
-                </Link>
+                <SidebarTrigger
+                    name="right"
+                    icon={<ShoppingCartIcon className="size-5" />}
+                ></SidebarTrigger>
                 <Sheet>
                     <SheetTrigger asChild>
                         <Button
@@ -203,9 +205,9 @@ export function AppSidebarHeader({
                     </SheetContent>
                 </Sheet>
 
-                <Link href="#">
+                <DropdownMenu>
                     <UserCircleIcon className="size-5" />
-                </Link>
+                </DropdownMenu>
             </div>
         </header>
     );

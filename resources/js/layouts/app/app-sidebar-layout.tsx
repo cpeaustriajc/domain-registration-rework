@@ -1,7 +1,8 @@
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
-import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { AppSidebarLeft } from '@/components/app-sidebar-left';
+import { AppSidebarRight } from '@/components/app-sidebar-right';
 import { type BreadcrumbItem } from '@/types';
 import { type PropsWithChildren } from 'react';
 
@@ -13,11 +14,10 @@ export default function AppSidebarLayout({
         <AppShell variant="sidebar">
             <AppSidebarHeader breadcrumbs={breadcrumbs} />
             <div className="flex flex-1">
-                <AppSidebar />
-                <AppContent variant="sidebar">
-                    {children}
-                </AppContent>
+                <AppSidebarLeft />
+                <AppContent variant="sidebar">{children}</AppContent>
             </div>
+            <AppSidebarRight />
         </AppShell>
     );
 }

@@ -69,10 +69,11 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
-export function AppSidebar() {
+export function AppSidebarLeft() {
     return (
         <Sidebar
             className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+            name='left'
             collapsible="icon"
             variant="inset"
         >

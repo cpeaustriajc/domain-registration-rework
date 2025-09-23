@@ -25,32 +25,58 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const SIDEBAR_COOKIE_NAME = "sidebar_state"
+const SIDEBAR_COOKIE_NAME = "sidebar_states"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
-type SidebarContextProps = {
-  state: "expanded" | "collapsed"
+const DEFAULT_SIDEBAR_NAME = "default"
+
+type SidebarEntry = {
   open: boolean
-  setOpen: (open: boolean) => void
   openMobile: boolean
-  setOpenMobile: (open: boolean) => void
-  isMobile: boolean
-  toggleSidebar: () => void
 }
 
-const SidebarContext = React.createContext<SidebarContextProps | null>(null)
+type SidebarContextValue = {
+  isMobile: boolean
+  // All sidebar states mapped by name
+  sidebars: Record<string, SidebarEntry>
+  // Update helpers by name
+  setOpen: (name: string, value: boolean | ((prev: boolean) => boolean)) => void
+  setOpenMobile: (name: string, value: boolean | ((prev: boolean) => boolean)) => void
+  toggleSidebar: (name: string) => void
+}
 
-function useSidebar() {
-  const context = React.useContext(SidebarContext)
-  if (!context) {
-    throw new Error("useSidebar must be used within a SidebarProvider.")
+const SidebarContext = React.createContext<SidebarContextValue | null>(null)
+const SidebarNameContext = React.createContext<string>(DEFAULT_SIDEBAR_NAME)
+
+function useSidebar(name?: string) {
+  const ctx = React.useContext(SidebarContext)
+  if (!ctx) throw new Error("useSidebar must be used within a SidebarProvider.")
+
+  const resolvedName = name ?? React.useContext(SidebarNameContext)
+  const entry = ctx.sidebars[resolvedName] ?? { open: false, openMobile: false }
+
+  const setOpen = (value: boolean | ((prev: boolean) => boolean)) =>
+    ctx.setOpen(resolvedName, value)
+  const setOpenMobile = (value: boolean | ((prev: boolean) => boolean)) =>
+    ctx.setOpenMobile(resolvedName, value)
+  const toggleSidebar = () => ctx.toggleSidebar(resolvedName)
+
+  // Back-compat return shape used across the app
+  return {
+    // name-aware state
+    open: entry.open,
+    openMobile: entry.openMobile,
+    isMobile: ctx.isMobile,
+    // derived for existing call sites
+    state: entry.open ? "expanded" : "collapsed",
+    setOpen,
+    setOpenMobile,
+    toggleSidebar,
   }
-
-  return context
 }
 
 function SidebarProvider({
@@ -67,63 +93,75 @@ function SidebarProvider({
   onOpenChange?: (open: boolean) => void
 }) {
   const isMobile = useIsMobile()
-  const [openMobile, setOpenMobile] = React.useState(false)
 
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen)
-  const open = openProp ?? _open
+  // Multi-sidebar state keyed by name; initialize with the default sidebar
+  const [sidebars, setSidebars] = React.useState<Record<string, SidebarEntry>>({
+    [DEFAULT_SIDEBAR_NAME]: { open: openProp ?? defaultOpen, openMobile: false },
+  })
+
+  // Controlled support for the default sidebar (back-compat)
+  React.useEffect(() => {
+    if (openProp === undefined) return
+    setSidebars((prev) => ({
+      ...prev,
+      [DEFAULT_SIDEBAR_NAME]: { ...prev[DEFAULT_SIDEBAR_NAME], open: openProp },
+    }))
+  }, [openProp])
+
   const setOpen = React.useCallback(
-    (value: boolean | ((value: boolean) => boolean)) => {
-      const openState = typeof value === "function" ? value(open) : value
-      if (setOpenProp) {
-        setOpenProp(openState)
-      } else {
-        _setOpen(openState)
-      }
-
-      // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+    (name: string, value: boolean | ((prev: boolean) => boolean)) => {
+      setSidebars((prev) => {
+        const current = prev[name] ?? { open: false, openMobile: false }
+        const nextOpen = typeof value === "function" ? value(current.open) : value
+        const next = { ...prev, [name]: { ...current, open: nextOpen } }
+        // Persist a simple CSV of open names
+        const openNames = Object.entries(next)
+          .filter(([, s]) => s.open)
+          .map(([k]) => k)
+          .join(",")
+        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openNames}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        setOpenProp?.(nextOpen)
+        return next
+      })
     },
-    [setOpenProp, open]
+    [setOpenProp]
   )
 
-  // Helper to toggle the sidebar.
-  const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
-  }, [isMobile, setOpen, setOpenMobile])
+  const setOpenMobile = React.useCallback(
+    (name: string, value: boolean | ((prev: boolean) => boolean)) => {
+      setSidebars((prev) => {
+        const current = prev[name] ?? { open: false, openMobile: false }
+        const nextMobile = typeof value === "function" ? value(current.openMobile) : value
+        return { ...prev, [name]: { ...current, openMobile: nextMobile } }
+      })
+    },
+    []
+  )
 
-  // Adds a keyboard shortcut to toggle the sidebar.
+  const toggleSidebar = React.useCallback(
+    (name: string) => {
+      return isMobile
+        ? setOpenMobile(name, (v) => !v)
+        : setOpen(name, (v) => !v)
+    },
+    [isMobile, setOpen, setOpenMobile]
+  )
+
+  // Global keyboard shortcut toggles the default sidebar by default
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-        (event.metaKey || event.ctrlKey)
-      ) {
+      if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
         event.preventDefault()
-        toggleSidebar()
+        toggleSidebar(DEFAULT_SIDEBAR_NAME)
       }
     }
-
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [toggleSidebar])
 
-  // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
-  const state = open ? "expanded" : "collapsed"
-
-  const contextValue = React.useMemo<SidebarContextProps>(
-    () => ({
-      state,
-      open,
-      setOpen,
-      isMobile,
-      openMobile,
-      setOpenMobile,
-      toggleSidebar,
-    }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+  const contextValue = React.useMemo<SidebarContextValue>(
+    () => ({ isMobile, sidebars, setOpen, setOpenMobile, toggleSidebar }),
+    [isMobile, sidebars, setOpen, setOpenMobile, toggleSidebar]
   )
 
   return (
@@ -131,13 +169,11 @@ function SidebarProvider({
       <TooltipProvider delayDuration={0}>
         <div
           data-slot="sidebar-wrapper"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH,
-              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as React.CSSProperties
-          }
+          style={{
+            "--sidebar-width": SIDEBAR_WIDTH,
+            "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+            ...style,
+          } as React.CSSProperties}
           className={cn(
             "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
             className
@@ -152,6 +188,7 @@ function SidebarProvider({
 }
 
 function Sidebar({
+  name,
   side = "left",
   variant = "sidebar",
   collapsible = "offcanvas",
@@ -159,11 +196,13 @@ function Sidebar({
   children,
   ...props
 }: React.ComponentProps<"div"> & {
+  name?: string
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const resolvedName = name ?? DEFAULT_SIDEBAR_NAME
+  const { isMobile, state, openMobile, setOpenMobile } = useSidebar(resolvedName)
 
   if (collapsible === "none") {
     return (
@@ -199,7 +238,9 @@ function Sidebar({
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
+          <SidebarNameContext.Provider value={resolvedName}>
+            <div className="flex h-full w-full flex-col">{children}</div>
+          </SidebarNameContext.Provider>
         </SheetContent>
       </Sheet>
     )
@@ -241,13 +282,15 @@ function Sidebar({
         )}
         {...props}
       >
-        <div
+        <SidebarNameContext.Provider value={resolvedName}>
+          <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
           className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
-        >
-          {children}
-        </div>
+          >
+            {children}
+          </div>
+        </SidebarNameContext.Provider>
       </div>
     </div>
   )
@@ -256,9 +299,12 @@ function Sidebar({
 function SidebarTrigger({
   className,
   onClick,
+  name,
+  icon,
   ...props
-}: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar()
+}: React.ComponentProps<typeof Button> & { name?: string; icon?: React.ReactNode }) {
+  const currentName = name ?? React.useContext(SidebarNameContext)
+  const { toggleSidebar } = useSidebar(currentName)
 
   return (
     <Button
@@ -273,14 +319,15 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      {icon ?? <PanelLeftIcon />}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
 }
 
-function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
-  const { toggleSidebar } = useSidebar()
+function SidebarRail({ className, name, ...props }: React.ComponentProps<"button"> & { name?: string }) {
+  const currentName = name ?? React.useContext(SidebarNameContext)
+  const { toggleSidebar } = useSidebar(currentName)
 
   return (
     <button

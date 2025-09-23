@@ -18,7 +18,7 @@ export function AppShell({ children, variant = 'header' }: AppShellProps) {
 
     return (
         <div className="[--header-height:calc(--spacing(14))]">
-            <SidebarProvider className="flex flex-col" defaultOpen={isOpen}>
+            <SidebarProvider  className="flex flex-col" defaultOpen={isOpen}>
                 {children}
             </SidebarProvider>
         </div>
