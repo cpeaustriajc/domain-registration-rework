@@ -11,11 +11,13 @@ export default function AppSidebarLayout({
 }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
     return (
         <AppShell variant="sidebar">
-            <AppSidebar />
-            <AppContent variant="sidebar" className="overflow-x-hidden">
-                <AppSidebarHeader breadcrumbs={breadcrumbs} />
-                {children}
-            </AppContent>
+            <AppSidebarHeader breadcrumbs={breadcrumbs} />
+            <div className="flex flex-1">
+                <AppSidebar />
+                <AppContent variant="sidebar" className="overflow-x-hidden">
+                    {children}
+                </AppContent>
+            </div>
         </AppShell>
     );
 }

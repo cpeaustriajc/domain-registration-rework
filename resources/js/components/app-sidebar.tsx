@@ -4,14 +4,16 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { domainTransfer, getDomain, myDomains, myProducts, preferences, pushDomain } from '@/routes';
+import {
+    domainTransfer,
+    getDomain,
+    myDomains,
+    myProducts,
+    preferences,
+    pushDomain,
+} from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
 import {
     ArrowRightLeftIcon,
     GlobeIcon,
@@ -21,7 +23,6 @@ import {
     Settings2Icon,
     ShoppingBagIcon,
 } from 'lucide-react';
-import AppLogo from './app-logo';
 import { NavDomainManagement } from './nav-domain-management';
 
 const mainNavItems: NavItem[] = [
@@ -70,20 +71,12 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={myDomains()} prefetch>
-                                <AppLogo />
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarHeader>
-
-            <SidebarContent>
+        <Sidebar
+            className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+            collapsible="icon"
+            variant="inset"
+        >
+            <SidebarContent className="py-4">
                 <NavMain items={mainNavItems} />
                 <NavDomainManagement items={domainManagementNavItems} />
             </SidebarContent>
