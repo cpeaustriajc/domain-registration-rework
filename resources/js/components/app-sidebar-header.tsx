@@ -73,7 +73,7 @@ export function AppSidebarHeader({
                 </Link>
                 {/* <Breadcrumbs breadcrumbs={breadcrumbs} /> */}
 
-                <NavigationMenu className="px-8">
+                <NavigationMenu className="hidden lg:flex px-8">
                     <NavigationMenuList>
                         {headerNavItems.map((item) => (
                             <NavigationMenuItem key={item.title}>
