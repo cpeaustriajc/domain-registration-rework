@@ -48,6 +48,7 @@ export interface MyDomainsTableProps {
     data?: Domain[];
     enableAdvancedFilter?: boolean;
     filterMode?: 'advancedFilters' | 'menu';
+    statusFilterOverride?: Domain['status'][];
 }
 
 const MOCK_DOMAINS: Domain[] = [
@@ -91,6 +92,7 @@ export function MyDomainsTable({
     data = MOCK_DOMAINS,
     enableAdvancedFilter = false,
     filterMode = 'advancedFilters',
+    statusFilterOverride,
 }: MyDomainsTableProps) {
     const [name] = useQueryState('name', parseAsString.withDefault(''));
     const [status] = useQueryState(
@@ -102,15 +104,17 @@ export function MyDomainsTable({
         React.useState<DataTableRowAction<Domain> | null>(null);
 
     const filteredData = React.useMemo<Domain[]>(() => {
+        const effectiveStatus = statusFilterOverride ?? status;
         return data.filter((domain) => {
             const matchesName =
                 name === '' ||
                 domain.name.toLowerCase().includes(name.toLowerCase());
             const matchesStatus =
-                status.length === 0 || status.includes(domain.status);
+                effectiveStatus.length === 0 ||
+                effectiveStatus.includes(domain.status);
             return matchesName && matchesStatus;
         });
-    }, [data, name, status]);
+    }, [data, name, status, statusFilterOverride]);
 
     const columns = React.useMemo<ColumnDef<Domain>[]>(
         () => [
