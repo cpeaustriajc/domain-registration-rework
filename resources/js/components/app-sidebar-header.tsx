@@ -1,5 +1,5 @@
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { NavItem, type BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import { NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
     BellIcon,
@@ -58,11 +58,7 @@ const announcementsNotifications = [
     { id: 2, message: 'Scheduled maintenance on Saturday.' },
 ];
 
-export function AppSidebarHeader({
-    breadcrumbs = [],
-}: {
-    breadcrumbs?: BreadcrumbItemType[];
-}) {
+export function AppSidebarHeader() {
     const page = usePage();
 
     return (
@@ -72,7 +68,6 @@ export function AppSidebarHeader({
                 <Link href="/my-domains">
                     <AppLogo />
                 </Link>
-                {/* <Breadcrumbs breadcrumbs={breadcrumbs} /> */}
 
                 <NavigationMenu className="hidden px-8 lg:flex">
                     <NavigationMenuList>

@@ -51,7 +51,7 @@ const domainManagementNavItems: NavItem[] = [
     },
     {
         title: 'Preferences',
-        href: preferences().url, // Use the correct route helper for preferences
+        href: preferences().url,
         icon: Settings2Icon,
     },
     {
@@ -84,7 +84,6 @@ export function AppSidebarLeft() {
 
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
-                {/* <NavUser /> */}
             </SidebarFooter>
         </Sidebar>
     );

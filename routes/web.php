@@ -9,7 +9,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('my-domains', function () {
-        return Inertia::render('my-domains');
+        return Inertia::render('my-domains/page');
     })->name('my-domains');
 
     Route::get('my-products', function () {
