@@ -112,6 +112,7 @@ function MyDomains() {
     );
 }
 
+// Do this for the other layouts that use Nuqs too
 MyDomains.layout = (page: React.ReactNode) => (
     <AppLayout breadcrumbs={breadcrumbs}>{page}</AppLayout>
 );
