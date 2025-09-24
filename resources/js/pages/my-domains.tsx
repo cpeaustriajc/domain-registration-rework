@@ -1,6 +1,6 @@
-import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableActionBar } from '@/components/data-table/data-table-action-bar';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -82,13 +82,6 @@ const allData: Domain[] = [
     },
 ];
 
-const activeData = allData.filter((domain) => domain.status === 'Active');
-const pendingData = allData.filter((domain) => domain.status === 'Pending');
-const expiredData = allData.filter((domain) => domain.status === 'Expired');
-const redemptionData = allData.filter(
-    (domain) => domain.status === 'Redemption',
-);
-
 const tabs = [
     { title: 'All', value: 'all' },
     { title: 'Active', value: 'active' },
@@ -97,14 +90,7 @@ const tabs = [
     { title: 'Redemption', value: 'redemption' },
 ];
 
-const filters = [
-    { column: 'status', value: 'active', label: 'Active' },
-    { column: 'status', value: 'pending', label: 'Pending' },
-    { column: 'status', value: 'expired', label: 'Expired' },
-    { column: 'status', value: 'redemption', label: 'Redemption' },
-];
-
- function MyDomains() {
+function MyDomains() {
     const [name] = useQueryState('name', parseAsString.withDefault(''));
     const [status] = useQueryState(
         'status',
@@ -177,24 +163,24 @@ const filters = [
                 header: 'Nameservers',
                 cell: ({ row }) => (
                     <div className="flex flex-col">
-                        {row.original.nameservers.length > 2 ? (
-                            (() => {
-                                const firstTwo = row.original.nameservers.slice(0, 2);
-                                const remaining = row.original.nameservers.length - 2;
-                                return (
-                                    <>
-                                        {firstTwo.map((ns, index) => (
-                                            <span key={index}>{ns}</span>
-                                        ))}
-                                        <Badge>+{remaining} more</Badge>
-                                    </>
-                                );
-                            })()
-                        ) : (
-                            row.original.nameservers.map((ns, index) => (
-                                <span key={index}>{ns}</span>
-                            ))
-                        )}
+                        {row.original.nameservers.length > 2
+                            ? (() => {
+                                  const firstTwo =
+                                      row.original.nameservers.slice(0, 2);
+                                  const remaining =
+                                      row.original.nameservers.length - 2;
+                                  return (
+                                      <>
+                                          {firstTwo.map((ns, index) => (
+                                              <span key={index}>{ns}</span>
+                                          ))}
+                                          <Badge>+{remaining} more</Badge>
+                                      </>
+                                  );
+                              })()
+                            : row.original.nameservers.map((ns, index) => (
+                                  <span key={index}>{ns}</span>
+                              ))}
                     </div>
                 ),
             },
@@ -221,9 +207,17 @@ const filters = [
                     // Use values matching the actual data (case-sensitive) so filtering works
                     options: [
                         { label: 'Active', value: 'Active', icon: CheckCircle },
-                        { label: 'Pending', value: 'Pending', icon: CheckCircle2 },
+                        {
+                            label: 'Pending',
+                            value: 'Pending',
+                            icon: CheckCircle2,
+                        },
                         { label: 'Expired', value: 'Expired', icon: XCircle },
-                        { label: 'Redemption', value: 'Redemption', icon: XCircle },
+                        {
+                            label: 'Redemption',
+                            value: 'Redemption',
+                            icon: XCircle,
+                        },
                     ],
                 },
                 enableColumnFilter: true,
@@ -306,16 +300,36 @@ const filters = [
                             </DataTable>
                         </TabsContent>
                         <TabsContent value="active">
-                            <DataTable table={table} />
+                            <DataTable
+                                table={table}
+                                actionBar={<DataTableActionBar table={table} />}
+                            >
+                                <DataTableToolbar table={table} />
+                            </DataTable>
                         </TabsContent>
                         <TabsContent value="pending">
-                            <DataTable table={table} />
+                            <DataTable
+                                table={table}
+                                actionBar={<DataTableActionBar table={table} />}
+                            >
+                                <DataTableToolbar table={table} />
+                            </DataTable>
                         </TabsContent>
                         <TabsContent value="expired">
-                            <DataTable table={table} />
+                            <DataTable
+                                table={table}
+                                actionBar={<DataTableActionBar table={table} />}
+                            >
+                                <DataTableToolbar table={table} />
+                            </DataTable>
                         </TabsContent>
                         <TabsContent value="redemption">
-                            <DataTable table={table} />
+                            <DataTable
+                                table={table}
+                                actionBar={<DataTableActionBar table={table} />}
+                            >
+                                <DataTableToolbar table={table} />
+                            </DataTable>
                         </TabsContent>
                     </Tabs>
                 </div>
