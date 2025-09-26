@@ -99,16 +99,7 @@ function SidebarProvider({
             } else {
                 _setLeftOpen(openState);
             }
-            try {
-                const cookieStr = `${SIDEBAR_COOKIE_NAME}:left=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
-                // Debug log to help diagnose why cookies may not be written
-                // (will appear in the browser console)
-                console.log('[Sidebar] setLeftOpen:', { openState, cookieStr });
-                document.cookie = cookieStr;
-                console.log('[Sidebar] document.cookie after setLeftOpen:', document.cookie);
-            } catch (err) {
-                console.error('[Sidebar] failed to set left cookie', err);
-            }
+            document.cookie = `${SIDEBAR_COOKIE_NAME}:left=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
         },
         [setLeftOpenProp, leftOpen],
     );
@@ -124,14 +115,7 @@ function SidebarProvider({
             } else {
                 _setRightOpen(openState);
             }
-            try {
-                const cookieStr = `${SIDEBAR_COOKIE_NAME}:right=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
-                console.log('[Sidebar] setRightOpen:', { openState, cookieStr });
-                document.cookie = cookieStr;
-                console.log('[Sidebar] document.cookie after setRightOpen:', document.cookie);
-            } catch (err) {
-                console.error('[Sidebar] failed to set right cookie', err);
-            }
+            document.cookie = `${SIDEBAR_COOKIE_NAME}:right=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
         },
         [setRightOpenProp, rightOpen],
     );
@@ -140,29 +124,16 @@ function SidebarProvider({
     const [rightOpenMobile, setRightOpenMobile] = React.useState(false);
 
     const toggleLeftSidebar = React.useCallback(() => {
-        if (isMobile) {
-            // Mobile toggle: doesn't persist the desktop cookie
-            console.log('[Sidebar] toggleLeftSidebar -> mobile path');
-            return setLeftOpenMobile((open) => !open);
-        }
-        // Desktop toggle: updates left open and persists cookie via setLeftOpen
-        console.log('[Sidebar] toggleLeftSidebar -> desktop path');
-        return setLeftOpen((open) => !open);
+        return isMobile
+            ? setLeftOpenMobile((open) => !open)
+            : setLeftOpen((open) => !open);
     }, [isMobile, setLeftOpen, setLeftOpenMobile]);
 
     const toggleRightSidebar = React.useCallback(() => {
-        if (isMobile) {
-            console.log('[Sidebar] toggleRightSidebar -> mobile path');
-            return setRightOpenMobile((open) => !open);
-        }
-        console.log('[Sidebar] toggleRightSidebar -> desktop path');
-        return setRightOpen((open) => !open);
+        return isMobile
+            ? setRightOpenMobile((open) => !open)
+            : setRightOpen((open) => !open);
     }, [isMobile, setRightOpen, setRightOpenMobile]);
-
-    // Confirm provider mounted on client
-    React.useEffect(() => {
-        console.log('[SidebarProvider] mounted');
-    }, []);
 
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -373,14 +344,13 @@ function Sidebar({
                 )}
                 {...props}
             >
-
-                    <div
-                        data-sidebar="sidebar"
-                        data-slot="sidebar-inner"
-                        className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
-                    >
-                        {children}
-                    </div>
+                <div
+                    data-sidebar="sidebar"
+                    data-slot="sidebar-inner"
+                    className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
+                >
+                    {children}
+                </div>
             </div>
         </div>
     );
