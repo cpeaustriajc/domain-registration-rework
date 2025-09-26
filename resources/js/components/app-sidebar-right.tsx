@@ -23,7 +23,6 @@ export function AppSidebarRight() {
             className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
             collapsible="offcanvas"
             variant="floating"
-            name="right"
             side="right"
         >
             <SidebarContent className="py-4">

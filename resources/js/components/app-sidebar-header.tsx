@@ -64,7 +64,7 @@ export function AppSidebarHeader() {
     return (
         <header className="sticky top-0 z-20 flex w-full shrink-0 items-center justify-between gap-2 bg-sidebar/95 px-6 backdrop-blur-md transition-[width,height] ease-linear supports-[backdrop-filter]:bg-sidebar/60 md:px-4">
             <div className="flex h-(--header-height) flex-1 items-center">
-                <SidebarTrigger name="left" className="mr-8" />
+                <SidebarTrigger side="left" className="mr-8" />
                 <Link href="/my-domains">
                     <AppLogo />
                 </Link>
@@ -106,7 +106,7 @@ export function AppSidebarHeader() {
 
             <div className="flex items-center gap-4">
                 <SidebarTrigger
-                    name="right"
+                    side="right"
                     icon={<ShoppingCartIcon className="size-5" />}
                 ></SidebarTrigger>
                 <Sheet>

@@ -30,6 +30,14 @@ const mainNavItems: NavItem[] = [
         title: 'Get Domain',
         href: getDomain().url,
         icon: SearchIcon,
+        items: [
+            {
+                title: 'Search',
+                icon: SearchIcon,
+                href: getDomain().url,
+                isActive: true,
+            },
+        ],
     },
     {
         title: 'My Domains',
@@ -73,7 +81,7 @@ export function AppSidebarLeft() {
     return (
         <Sidebar
             className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
-            name='left'
+            side="left"
             collapsible="icon"
             variant="inset"
         >
