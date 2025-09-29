@@ -18,7 +18,7 @@ import { ChevronsUpDown } from 'lucide-react';
 
 export function NavUser() {
     const { auth } = usePage<SharedData>().props;
-    const { state } = useSidebar();
+    const { leftSidebar } = useSidebar();
     const isMobile = useIsMobile();
 
     return (
@@ -40,7 +40,7 @@ export function NavUser() {
                         side={
                             isMobile
                                 ? 'bottom'
-                                : state === 'collapsed'
+                                : leftSidebar.state === 'collapsed'
                                   ? 'left'
                                   : 'bottom'
                         }

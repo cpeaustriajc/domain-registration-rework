@@ -86,6 +86,32 @@ const MOCK_DOMAINS: Domain[] = [
         created_at: '2023-01-01',
         expiration_at: '2023-08-20',
     },
+    ...Array.from({ length: 27 }).map((_, i) => {
+        const id = 4 + i;
+        const name = `demo-${id}.example`;
+        const nameservers =
+            id % 3 === 0
+                ? ['ns1.demo.example', 'ns2.demo.example', 'ns3.demo.example']
+                : ['ns1.demo.example', 'ns2.demo.example'];
+        const statuses: Domain['status'][] = ['Active', 'Pending', 'Expired', 'Redemption'];
+        const categories: Domain['category'][] = ['Business', 'Personal', 'Other'];
+        const status = statuses[id % statuses.length];
+        const category = categories[id % categories.length];
+        const created = new Date(2022, (id % 12), 1);
+        const expiration = new Date(2024 + (id % 3), (id % 12) + 1, 15);
+
+        const pad = (n: number) => String(n).padStart(2, '0');
+
+        return {
+            id,
+            name,
+            nameservers,
+            status,
+            category,
+            created_at: `${created.getFullYear()}-${pad(created.getMonth() + 1)}-${pad(created.getDate())}`,
+            expiration_at: `${expiration.getFullYear()}-${pad(expiration.getMonth() + 1)}-${pad(expiration.getDate())}`,
+        } as Domain;
+    }),
 ];
 
 export function MyDomainsTable({
@@ -142,6 +168,7 @@ export function MyDomainsTable({
                 ),
                 enableSorting: false,
                 enableHiding: false,
+                enablePinning: false,
                 size: 32,
             },
             {
@@ -163,6 +190,7 @@ export function MyDomainsTable({
                     icon: Text,
                 },
                 enableColumnFilter: true,
+                size: 240,
             },
             {
                 id: 'nameservers',
@@ -229,17 +257,25 @@ export function MyDomainsTable({
                     ],
                 },
                 enableColumnFilter: true,
+                size: 160,
             },
-            { id: 'category', accessorKey: 'category', header: 'Category' },
+            {
+                id: 'category',
+                accessorKey: 'category',
+                header: 'Category',
+                size: 180,
+            },
             {
                 id: 'created_at',
                 accessorFn: (r) => r.created_at,
                 header: 'Created At',
+                size: 200,
             },
             {
                 id: 'expiration_at',
                 accessorFn: (r) => r.expiration_at,
                 header: 'Expiration At',
+                size: 200,
             },
             {
                 id: 'actions',
@@ -273,6 +309,7 @@ export function MyDomainsTable({
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ),
+                enablePinning: false,
             },
         ],
         [],
@@ -284,7 +321,7 @@ export function MyDomainsTable({
         pageCount: 1,
         initialState: {
             sorting: [{ id: 'name', desc: false }],
-            columnPinning: { right: ['actions'] },
+            columnPinning: { left: ['select', 'name'], right: ['actions'] },
         },
         getRowId: (row) => row.id.toString(),
         shallow: false,
@@ -292,11 +329,18 @@ export function MyDomainsTable({
         enableAdvancedFilter,
     });
 
+
     return (
         <>
             <DataTable
                 table={table}
                 actionBar={<MyDomainsTableActionBar table={table} />}
+                scrollAreaProps={{
+                    className: 'max-h-[28rem] w-full',
+                    showHorizontalScrollbar: true,
+                    type: 'auto',
+                }}
+                tableContainerClassName="shadow-sm"
             >
                 {enableAdvancedFilter ? (
                     <DataTableAdvancedToolbar table={table}>

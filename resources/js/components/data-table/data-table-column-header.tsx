@@ -4,6 +4,9 @@ import {
     ChevronsUpDown,
     ChevronUp,
     EyeOff,
+    PanelLeft,
+    PanelRight,
+    PinOff,
     X,
 } from 'lucide-react';
 
@@ -12,6 +15,7 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -90,6 +94,36 @@ export function DataTableColumnHeader<TData, TValue>({
                         <EyeOff />
                         Hide
                     </DropdownMenuCheckboxItem>
+                )}
+                {column.getCanPin?.() && (
+                    <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            className="pl-2 [&_svg]:text-muted-foreground"
+                            disabled={column.getIsPinned() === 'left'}
+                            onSelect={() => column.pin?.('left')}
+                        >
+                            <PanelLeft />
+                            Pin left
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            className="pl-2 [&_svg]:text-muted-foreground"
+                            disabled={column.getIsPinned() === 'right'}
+                            onSelect={() => column.pin?.('right')}
+                        >
+                            <PanelRight />
+                            Pin right
+                        </DropdownMenuItem>
+                        {column.getIsPinned() && (
+                            <DropdownMenuItem
+                                className="pl-2 [&_svg]:text-muted-foreground"
+                                onSelect={() => column.pin?.(false)}
+                            >
+                                <PinOff />
+                                Unpin
+                            </DropdownMenuItem>
+                        )}
+                    </>
                 )}
             </DropdownMenuContent>
         </DropdownMenu>

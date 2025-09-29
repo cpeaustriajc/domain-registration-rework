@@ -9,15 +9,28 @@ import type { Column } from '@tanstack/react-table';
 export function getCommonPinningStyles<TData>({
     column,
     withBorder = false,
+    isHeader = false,
+    zIndex = 10,
 }: {
     column: Column<TData>;
     withBorder?: boolean;
+    isHeader?: boolean;
+    zIndex?: number;
 }): React.CSSProperties {
     const isPinned = column.getIsPinned();
     const isLastLeftPinnedColumn =
         isPinned === 'left' && column.getIsLastColumn('left');
     const isFirstRightPinnedColumn =
         isPinned === 'right' && column.getIsFirstColumn('right');
+
+    const resolvedPosition = isPinned || isHeader ? 'sticky' : 'relative';
+    const resolvedZIndex = isPinned
+        ? zIndex
+        : isHeader
+          ? Math.max(zIndex - 1, 1)
+          : undefined;
+
+    const width = column.getSize();
 
     return {
         boxShadow: withBorder
@@ -31,12 +44,19 @@ export function getCommonPinningStyles<TData>({
         right:
             isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
         opacity: isPinned ? 0.97 : 1,
-        position: isPinned ? 'sticky' : 'relative',
-        background: isPinned ? 'var(--background)' : 'var(--background)',
-        width: column.getSize(),
-        zIndex: isPinned ? 1 : 0,
+        position: resolvedPosition,
+        background: 'var(--background)',
+        width,
+        minWidth: width,
+        maxWidth: width,
+        top: isHeader ? 0 : undefined,
+        zIndex: resolvedZIndex,
+        overflowX: isPinned ? 'hidden' : undefined,
+        overflowY: isPinned ? 'hidden' : undefined,
     };
+
 }
+
 
 export function getFilterOperators(filterVariant: FilterVariant) {
     const operatorMap: Record<
